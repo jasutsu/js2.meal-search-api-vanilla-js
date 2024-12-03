@@ -6,9 +6,9 @@ const recipeCloseBtn = document.getElementById('recipe-close-btn');
 
 const getMealList = () => {
     const searchText = searchInput.value.trim();
-    const url = `https://www.themealdb.com/api/json/v1/1/filter.php?i=${searchText}`;
+    const filterUrl = `https://www.themealdb.com/api/json/v1/1/filter.php?i=${searchText}`;
     console.log('Start Fetch');
-    fetch(url)
+    fetch(filterUrl)
         .then(response => response.json())
         .then(data => {
             mealList.innerHTML = "";
@@ -40,10 +40,36 @@ const getMealList = () => {
         .catch(error => console.error('Fetch Error: ', error));
 };
 
-const getMealRecipe = () => {
-
+const getMealRecipe = (e) => {
+    e.preventDefault();
+    updateMealRecipeDOM('dsf');
+    if(e.target.classList.contains('recipe-btn')) {
+        const mealItem = e.target.parentElement.parentElement;
+        const lookupUrl = `https://www.themealdb.com/api/json/v1/1/lookup.php?i=${mealItem.dataset.id}`;
+        fetch(lookupUrl)
+            .then(response => response.json())
+            .then(data => updateMealRecipeDOM(data.meals[0]))
+            .catch(error => console.log('Fetch Error: ', error));
+    }
 };
 
+const updateMealRecipeDOM = (mealRecipe) => {
+    mealDetailsContent.innerHTML = `
+        <h2 class="recipe-title">${mealRecipe.strMeal}</h2>
+        <p class="recipe-category">${mealRecipe.strCategory}</p>
+        <div class="recipe-instruct">
+            <h3>Instructions:</h3>
+            <p>${mealRecipe.strInstructions}</p>
+        </div>
+        <div class="recipe-meal-img">
+            <img src="${mealRecipe.strMealThumb}" alt="">
+        </div>
+        <div class="recipe-link">
+            <a href="${mealRecipe.strYoutube}" target="_blank">Watch Video</a>
+        </div>
+    `;
+    mealDetailsContent.parentElement.classList.add('showRecipe');
+};
 
 searchBtn.addEventListener('click', getMealList);
 mealList.addEventListener('click', getMealRecipe);
